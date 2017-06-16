@@ -29,13 +29,14 @@ class VarDump {
 
   /**
    * Process array value;
-   * @param $data
-   * @param $leaf
+   * @param $data -  array data
+   * @param $leaf - The leaf of the tree
+   * @param bool $skipHeader - is is true the array header will not be printed
    * @return string
    */
-  private function valueArray($data, $leaf) {
-    $output = $this->addTab($leaf);
-    $output .= 'array(' . count($data) . ') {' . PHP_EOL;
+  private function valueArray($data, $leaf, $skipHeader = FALSE) {
+    $output = $skipHeader ? '' : $this->addTab($leaf);
+    $output .= $skipHeader ? '' : 'array(' . count($data) . ') {' . PHP_EOL;
     ++$leaf;
     foreach ($data as $key => $value) {
       $valueType = gettype($value);
@@ -49,7 +50,7 @@ class VarDump {
         $output .= $this->$valueFunction($value, $leaf, $valueType);
       }
     }
-    $output .= $this->addTab(--$leaf) . '}' . PHP_EOL;
+    $output .= $skipHeader ? '' : $this->addTab(--$leaf) . '}' . PHP_EOL;
     return $output;
   }
 
@@ -62,10 +63,9 @@ class VarDump {
    */
   private function valueObject($obj, $leaf, $type) {
     $output = $this->addTab($leaf);
-    ++$leaf;
     $objVars = get_object_vars($obj);
     $output .= $type . '(' . get_class($obj) . ')' . '#' . self::$objectCount . '(' . count($objVars) . ')' . PHP_EOL;
-    $output .= $this->valueArray($objVars, $leaf);
+    $output .= $this->valueArray($objVars, $leaf, TRUE);
     ++self::$objectCount;
     return $output;
   }
